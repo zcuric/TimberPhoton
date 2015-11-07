@@ -52,12 +52,10 @@ class TimberPhoton
      * @param $src
      * @param $w
      * @param $h
-     * @param string $color
-     * @param bool|false $force
      *
      * @return string
      */
-    public function letterbox($src, $w, $h, $color = '#000000', $force = false)
+    public function letterbox($src, $w, $h)
     {
 
         /* 
@@ -81,14 +79,12 @@ class TimberPhoton
     }
 
     /**
-     * @param $src
-     * @param $w
+     * @param string $src
+     * @param int $w
      * @param int $h
-     * @param string $crop
-     * @param bool|false $force_resize
      * @return string
      */
-    public function resize($src, $w, $h = 0, $crop = 'default', $force_resize = false)
+    public function resize($src, $w, $h = 0)
     {
         if (empty($src)) {
             return '';
