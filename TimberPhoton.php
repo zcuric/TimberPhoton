@@ -33,6 +33,8 @@ class TimberPhoton
         $twig->addFilter('fit', new Twig_Filter_Function(array($this, 'fit')));
         $twig->addFilter('letterbox', new Twig_Filter_Function(array($this, 'letterbox')));
         $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
+        $twig->addFilter('crop', new Twig_Filter_Function(array($this, 'crop')));
+
 
         return $twig;
     }
@@ -127,6 +129,32 @@ class TimberPhoton
         $src = $this->photon_url($src);
 
         $args['fit'] = $width . ',' . $height;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see http://developer.wordpress.com/docs/photon/api/#crop
+     *
+     * @param string $src
+     * @param string $x
+     * @param string $y
+     * @param string $width
+     * @param string $height
+     *
+     * @return string
+     */
+    public function crop($src, $x, $y, $width, $height)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['crop'] = $x . ',' . $y . ',' . $width . ',' . $height;
 
         $src = add_query_arg($args, $src);
 
