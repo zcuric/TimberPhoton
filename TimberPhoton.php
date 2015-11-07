@@ -32,7 +32,7 @@ class TimberPhoton
         $twig->addFilter('crop', new Twig_Filter_Function(array($this, 'crop')));
         $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
         $twig->addFilter('fit', new Twig_Filter_Function(array($this, 'fit')));
-        $twig->addFilter('lb', new Twig_Filter_Function(array($this, 'letterbox')));
+        $twig->addFilter('lb', new Twig_Filter_Function(array($this, 'add_black_letterboxing')));
         $twig->addFilter('ulb', new Twig_Filter_Function(array($this, 'remove_black_letterboxing')));
         $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
 
@@ -140,12 +140,12 @@ class TimberPhoton
      * @see http://developer.wordpress.com/docs/photon/api/#lb
      *
      * @param string $src
-     * @param int    $w
-     * @param int    $h
+     * @param int    $width
+     * @param int    $height
      *
      * @return string
      */
-    public function letterbox($src, $w, $h)
+    public function add_black_letterboxing($src, $width, $height)
     {
         if (empty($src)) {
             return '';
@@ -154,7 +154,7 @@ class TimberPhoton
         $src = $this->photon_url($src);
 
         $args = array(
-            'lb' => $w.','.$h,
+            'lb' => $width.','.$height,
         );
 
         $src = add_query_arg($args, $src);
