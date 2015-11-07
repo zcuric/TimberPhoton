@@ -226,29 +226,29 @@ class TimberPhoton
      */
     public function photon_url($url)
     {
-        if ($parsed = parse_url($url)) {
-            if (in_array($parsed['host'], $this->photon_hosts)) {
-                // $url is already a Photon URL.
-                // Leave it alone.
-            } else {
-                // Strip http:// from $url.
-                $stripped_url = $parsed['host'].$parsed['path'];
-                if (!empty($parsed['query'])) {
-                    $stripped_url .= '?'.$parsed['query'];
-                }
+        $parsed_url = parse_url($url);
 
-                /*
-                 * Pick a Photon host based on the crc32 of the stripped_url.
-                 * Photon docs: Multiple domains. In order to take advantage of parallel downloads
-                 * we support multiple sub-domains for Photon. If you tend to have many images per
-                 * page you can split them across i0.wp.com, i1.wp.com, and i2.wp.com.
-                 */
-                $photon_host = $this->photon_hosts[abs(crc32($stripped_url) % 2)];
-
-                // Create a Photon URL.
-                $url = $parsed['scheme'].'://'.$photon_host.'/'.$stripped_url;
-            }
+        if (in_array($parsed_url['host'], $this->photon_hosts)) {
+            return $url;
         }
+
+        // Strip http:// from $url.
+        $stripped_url = $parsed_url['host'] . $parsed_url['path'];
+
+        if (!empty($parsed_url['query'])) {
+            $stripped_url .= '?' . $parsed_url['query'];
+        }
+
+        /*
+         * Pick a Photon host based on the crc32 of the stripped_url.
+         * Photon docs: Multiple domains. In order to take advantage of parallel downloads
+         * we support multiple sub-domains for Photon. If you tend to have many images per
+         * page you can split them across i0.wp.com, i1.wp.com, and i2.wp.com.
+         */
+        $photon_host = $this->photon_hosts[abs(crc32($stripped_url) % 2)];
+
+        // Create a Photon URL.
+        $url = $parsed_url['scheme'] . ':// '. $photon_host . '/' . $stripped_url;
 
         return $url;
     }
