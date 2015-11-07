@@ -30,6 +30,7 @@ class TimberPhoton
     {
         $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
         $twig->addFilter('letterbox', new Twig_Filter_Function(array($this, 'letterbox')));
+        $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
 
         return $twig;
     }
@@ -58,15 +59,15 @@ class TimberPhoton
     public function letterbox($src, $w, $h)
     {
 
-        /* 
+        /*
          * Translate the URL.
          * Only necessary for Timber versions (0.18.0 and older) that lack the 'timber_image_src' filter.
          */
         $src = $this->photon_url($src);
 
         /* Apply letterbox
-         * Photon docs: Add black letterboxing effect to images, by scaling them to width, height 
-         * while maintaining the aspect ratio and filling the rest with black. 
+         * Photon docs: Add black letterboxing effect to images, by scaling them to width, height
+         * while maintaining the aspect ratio and filling the rest with black.
          * See: http://developer.wordpress.com/docs/photon/api/#lb
          */
         $args = array(
@@ -84,36 +85,50 @@ class TimberPhoton
      * @param int $h
      * @return string
      */
-    public function resize($src, $w, $h = 0)
+    public function resize($src, $width, $height = 0)
     {
         if (empty($src)) {
             return '';
         }
 
-        /* 
+        /**
          * Translate the URL.
          * Only necessary for Timber versions (0.18.0 and older) that lack the 'timber_image_src' filter.
          */
         $src = $this->photon_url($src);
 
-        /* Set width
-         * Photon docs: Set the width of an image. Defaults to pixels, supports percentages. 
-         * See: http://developer.wordpress.com/docs/photon/api/#w
-         */
-        $args = array(
-            'w' => $w,
-        );
+        $args = [];
 
-        /* Use resize if height is set
-         * Photon docs: Resize and crop an image to exact width,height pixel dimensions. 
-         * Set the first number as close to the target size as possible and then crop the rest. 
-         * Which direction it’s resized and cropped depends on the aspect ratios of the original image and the target size.
+        /**
          * See: http://developer.wordpress.com/docs/photon/api/#resize
          */
-        if (!empty($h)) {
-            $args['resize'] = $w.','.$h;
-            unset($args['w']);
+        if (!empty($height)) {
+            $args['resize'] = $width . ',' . $height;
+        } else {
+            $args['w'] = $width;
         }
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#quality
+     *
+     * @param $src
+     * @param int $quality
+     * @return string
+     */
+    public function set_quality($src, $quality = 100)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['quality'] = $quality;
 
         $src = add_query_arg($args, $src);
 
@@ -123,6 +138,7 @@ class TimberPhoton
     public function plugins_loaded()
     {
         if ($this->system_ready()) {
+            add_action('timber/twig/filters', array(&$this, 'twig_apply_filters'), 99);
             add_action('twig_apply_filters', array(&$this, 'twig_apply_filters'), 99);
             add_filter('timber_image_src', array($this, 'timber_image_src'));
         }
@@ -151,8 +167,8 @@ class TimberPhoton
 
                 /*
                  * Pick a Photon host based on the crc32 of the stripped_url.
-                 * Photon docs: Multiple domains. In order to take advantage of parallel downloads 
-                 * we support multiple sub-domains for Photon. If you tend to have many images per 
+                 * Photon docs: Multiple domains. In order to take advantage of parallel downloads
+                 * we support multiple sub-domains for Photon. If you tend to have many images per
                  * page you can split them across i0.wp.com, i1.wp.com, and i2.wp.com.
                  */
                 $photon_host = $this->photon_hosts[abs(crc32($stripped_url) % 2)];
