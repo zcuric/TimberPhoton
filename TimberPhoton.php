@@ -54,6 +54,7 @@ class TimberPhoton
 	 * @param $h
 	 * @param string $color
 	 * @param bool|false $force
+	 *
 	 * @return string
      */
 	public function letterbox($src, $w, $h, $color = '#000000', $force = false)
