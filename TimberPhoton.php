@@ -30,6 +30,7 @@ class TimberPhoton
     public function twig_apply_filters($twig)
     {
         $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
+        $twig->addFilter('fit', new Twig_Filter_Function(array($this, 'fit')));
         $twig->addFilter('letterbox', new Twig_Filter_Function(array($this, 'letterbox')));
         $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
 
@@ -97,10 +98,35 @@ class TimberPhoton
         $args = [];
 
         if (!empty($height)) {
-            $args['resize'] = $width.','.$height;
+            $args['resize'] = $width . ',' . $height;
         } else {
             $args['w'] = $width;
         }
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+
+    /**
+     * @see http://developer.wordpress.com/docs/photon/api/#fit
+     *
+     * @param string $src
+     * @param int    $w
+     * @param int    $h
+     *
+     * @return string
+     */
+    public function fit($src, $width, $height)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['fit'] = $width . ',' . $height;
 
         $src = add_query_arg($args, $src);
 
