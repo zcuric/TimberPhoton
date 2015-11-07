@@ -24,6 +24,7 @@ class TimberPhoton
 
     /**
      * @param $twig
+     *
      * @return mixed
      */
     public function twig_apply_filters($twig)
@@ -50,26 +51,22 @@ class TimberPhoton
     }
 
     /**
-     * @param $src
-     * @param $w
-     * @param $h
+     * @see http://developer.wordpress.com/docs/photon/api/#lb
+     *
+     * @param string $src
+     * @param int    $w
+     * @param int    $h
      *
      * @return string
      */
     public function letterbox($src, $w, $h)
     {
+        if (empty($src)) {
+            return '';
+        }
 
-        /*
-         * Translate the URL.
-         * Only necessary for Timber versions (0.18.0 and older) that lack the 'timber_image_src' filter.
-         */
         $src = $this->photon_url($src);
 
-        /* Apply letterbox
-         * Photon docs: Add black letterboxing effect to images, by scaling them to width, height
-         * while maintaining the aspect ratio and filling the rest with black.
-         * See: http://developer.wordpress.com/docs/photon/api/#lb
-         */
         $args = array(
             'lb' => $w.','.$h,
         );
@@ -80,9 +77,13 @@ class TimberPhoton
     }
 
     /**
+     * @see http://developer.wordpress.com/docs/photon/api/#resize
+     * @see http://developer.wordpress.com/docs/photon/api/#w
+     *
      * @param string $src
-     * @param int $w
-     * @param int $h
+     * @param int    $w
+     * @param int    $h
+     *
      * @return string
      */
     public function resize($src, $width, $height = 0)
@@ -91,19 +92,12 @@ class TimberPhoton
             return '';
         }
 
-        /**
-         * Translate the URL.
-         * Only necessary for Timber versions (0.18.0 and older) that lack the 'timber_image_src' filter.
-         */
         $src = $this->photon_url($src);
 
         $args = [];
 
-        /**
-         * See: http://developer.wordpress.com/docs/photon/api/#resize
-         */
         if (!empty($height)) {
-            $args['resize'] = $width . ',' . $height;
+            $args['resize'] = $width.','.$height;
         } else {
             $args['w'] = $width;
         }
@@ -116,8 +110,9 @@ class TimberPhoton
     /**
      * @see https://developer.wordpress.com/docs/photon/api/#quality
      *
-     * @param $src
-     * @param int $quality
+     * @param string $src
+     * @param int    $quality
+     *
      * @return string
      */
     public function set_quality($src, $quality = 100)
@@ -144,12 +139,12 @@ class TimberPhoton
         }
     }
 
-
     /**
      * Translate a URL to a Photon URL.
-     * Photon docs: http://i0.wp.com/$REMOTE_IMAGE_URL
+     * Photon docs: http://i0.wp.com/$REMOTE_IMAGE_URL.
      *
      * @param $url
+     *
      * @return string
      */
     public function photon_url($url)
