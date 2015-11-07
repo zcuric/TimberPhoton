@@ -85,8 +85,8 @@ class TimberPhoton
      * @see http://developer.wordpress.com/docs/photon/api/#w
      *
      * @param string $src
-     * @param int    $w
-     * @param int    $h
+     * @param int    $width
+     * @param int    $height
      *
      * @return string
      */
@@ -116,8 +116,8 @@ class TimberPhoton
      * @see http://developer.wordpress.com/docs/photon/api/#fit
      *
      * @param string $src
-     * @param int    $w
-     * @param int    $h
+     * @param int    $width
+     * @param int    $height
      *
      * @return string
      */
