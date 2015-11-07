@@ -10,7 +10,7 @@ Author URI: http://slimndap.com
 
 class TimberPhoton
 {
-	public function __construct()
+    public function __construct()
     {
         $this->admin_notices = array();
         $this->photon_hosts = array(
@@ -22,11 +22,11 @@ class TimberPhoton
         add_action('plugins_loaded', array($this, 'plugins_loaded'));
     }
 
-	/**
-	 * @param $twig
-	 * @return mixed
+    /**
+     * @param $twig
+     * @return mixed
      */
-	public function twig_apply_filters($twig)
+    public function twig_apply_filters($twig)
     {
         $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
         $twig->addFilter('letterbox', new Twig_Filter_Function(array($this, 'letterbox')));
@@ -34,7 +34,7 @@ class TimberPhoton
         return $twig;
     }
 
-	public function admin_notices()
+    public function admin_notices()
     {
         if (!empty($this->admin_notices)) {
             echo '<div class="error"><p>';
@@ -48,16 +48,16 @@ class TimberPhoton
         }
     }
 
-	/**
-	 * @param $src
-	 * @param $w
-	 * @param $h
-	 * @param string $color
-	 * @param bool|false $force
-	 *
-	 * @return string
+    /**
+     * @param $src
+     * @param $w
+     * @param $h
+     * @param string $color
+     * @param bool|false $force
+     *
+     * @return string
      */
-	public function letterbox($src, $w, $h, $color = '#000000', $force = false)
+    public function letterbox($src, $w, $h, $color = '#000000', $force = false)
     {
 
         /* 
@@ -80,15 +80,15 @@ class TimberPhoton
         return $src;
     }
 
-	/**
-	 * @param $src
-	 * @param $w
-	 * @param int $h
-	 * @param string $crop
-	 * @param bool|false $force_resize
-	 * @return string
+    /**
+     * @param $src
+     * @param $w
+     * @param int $h
+     * @param string $crop
+     * @param bool|false $force_resize
+     * @return string
      */
-	public function resize($src, $w, $h = 0, $crop = 'default', $force_resize = false)
+    public function resize($src, $w, $h = 0, $crop = 'default', $force_resize = false)
     {
         if (empty($src)) {
             return '';
@@ -133,14 +133,14 @@ class TimberPhoton
     }
 
 
-	/**
-	 * Translate a URL to a Photon URL.
-	 * Photon docs: http://i0.wp.com/$REMOTE_IMAGE_URL
-	 *
-	 * @param $url
-	 * @return string
+    /**
+     * Translate a URL to a Photon URL.
+     * Photon docs: http://i0.wp.com/$REMOTE_IMAGE_URL
+     *
+     * @param $url
+     * @return string
      */
-	public function photon_url($url)
+    public function photon_url($url)
     {
         if ($parsed = parse_url($url)) {
             if (in_array($parsed['host'], $this->photon_hosts)) {
