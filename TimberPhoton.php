@@ -29,11 +29,12 @@ class TimberPhoton
      */
     public function twig_apply_filters($twig)
     {
+        $twig->addFilter('crop', new Twig_Filter_Function(array($this, 'crop')));
         $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
         $twig->addFilter('fit', new Twig_Filter_Function(array($this, 'fit')));
-        $twig->addFilter('letterbox', new Twig_Filter_Function(array($this, 'letterbox')));
+        $twig->addFilter('lb', new Twig_Filter_Function(array($this, 'letterbox')));
+        $twig->addFilter('ulb', new Twig_Filter_Function(array($this, 'remove_black_letterboxing')));
         $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
-        $twig->addFilter('crop', new Twig_Filter_Function(array($this, 'crop')));
 
 
         return $twig;
@@ -54,15 +55,17 @@ class TimberPhoton
     }
 
     /**
-     * @see http://developer.wordpress.com/docs/photon/api/#lb
+     * @see http://developer.wordpress.com/docs/photon/api/#crop
      *
      * @param string $src
-     * @param int    $w
-     * @param int    $h
+     * @param string $x
+     * @param string $y
+     * @param string $width
+     * @param string $height
      *
      * @return string
      */
-    public function letterbox($src, $w, $h)
+    public function crop($src, $x, $y, $width, $height)
     {
         if (empty($src)) {
             return '';
@@ -70,9 +73,7 @@ class TimberPhoton
 
         $src = $this->photon_url($src);
 
-        $args = array(
-            'lb' => $w.','.$h,
-        );
+        $args['crop'] = $x . ',' . $y . ',' . $width . ',' . $height;
 
         $src = add_query_arg($args, $src);
 
@@ -136,17 +137,15 @@ class TimberPhoton
     }
 
     /**
-     * @see http://developer.wordpress.com/docs/photon/api/#crop
+     * @see http://developer.wordpress.com/docs/photon/api/#lb
      *
      * @param string $src
-     * @param string $x
-     * @param string $y
-     * @param string $width
-     * @param string $height
+     * @param int    $w
+     * @param int    $h
      *
      * @return string
      */
-    public function crop($src, $x, $y, $width, $height)
+    public function letterbox($src, $w, $h)
     {
         if (empty($src)) {
             return '';
@@ -154,7 +153,31 @@ class TimberPhoton
 
         $src = $this->photon_url($src);
 
-        $args['crop'] = $x . ',' . $y . ',' . $width . ',' . $height;
+        $args = array(
+            'lb' => $w.','.$h,
+        );
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#uld
+     *
+     * @param string $src
+     *
+     * @return string
+     */
+    public function remove_black_letterboxing($src)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['uld'] = true;
 
         $src = add_query_arg($args, $src);
 
