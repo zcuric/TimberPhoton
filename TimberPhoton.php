@@ -29,8 +29,14 @@ class TimberPhoton
         $twig->addFilter('fit', new Twig_Filter_Function([$this, 'fit']));
         $twig->addFilter('lb', new Twig_Filter_Function([$this, 'add_black_letterboxing']));
         $twig->addFilter('ulb', new Twig_Filter_Function([$this, 'remove_black_letterboxing']));
-        $twig->addFilter('quality', new Twig_Filter_Function([$this, 'set_quality']));
         $twig->addFilter('image_filter', new Twig_Filter_Function([$this, 'apply_image_filter']));
+        $twig->addFilter('brightness', new Twig_Filter_Function([$this, 'set_brightness']));
+        $twig->addFilter('contrast', new Twig_Filter_Function([$this, 'set_contrast']));
+        $twig->addFilter('colorize', new Twig_Filter_Function([$this, 'colorize']));
+        $twig->addFilter('smooth', new Twig_Filter_Function([$this, 'smooth']));
+        $twig->addFilter('zoom', new Twig_Filter_Function([$this, 'zoom']));
+        $twig->addFilter('quality', new Twig_Filter_Function([$this, 'set_quality']));
+        $twig->addFilter('strip', new Twig_Filter_Function([$this, 'strip']));
 
         return $twig;
     }
@@ -148,9 +154,9 @@ class TimberPhoton
 
         $src = $this->photon_url($src);
 
-        $args = array(
+        $args = [
             'lb' => $width.','.$height,
-        );
+        ];
 
         $src = add_query_arg($args, $src);
 
@@ -173,6 +179,148 @@ class TimberPhoton
         $src = $this->photon_url($src);
 
         $args['uld'] = true;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#filter
+     *
+     * @param string $src
+     * @param string $filter
+     *
+     * @return string
+     */
+    public function apply_image_filter($src, $filter)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['filter'] = $filter;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#brightness
+     *
+     * @param string $src
+     * @param int $brightness
+     *
+     * @return string
+     */
+    public function set_brightness($src, $brightness)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['brightness'] = $brightness;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#contrast
+     *
+     * @param string $src
+     * @param int $brightness
+     *
+     * @return string
+     */
+    public function set_contrast($src, $contrast)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['contrast'] = $contrast;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#colorize
+     *
+     * @param string $src
+     * @param int $red
+     * @param int $green
+     * @param int $blue
+     *
+     * @return string
+     *
+     */
+    public function colorize($src, $red = 0, $green = 0, $blue = 0)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['colorize'] = $red.','.$green.','.$blue;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#smooth
+     *
+     * @param string $src
+     * @param int $smooth
+     *
+     * @return string
+     *
+     */
+    public function smooth($src, $smooth)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['smooth'] = $smooth;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#zoom
+     *
+     * @param string $src
+     * @param int|float $zoom
+     *
+     * @return string
+     */
+    public function zoom($src, $zoom)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['zoom'] = $zoom;
 
         $src = add_query_arg($args, $src);
 
@@ -203,14 +351,15 @@ class TimberPhoton
     }
 
     /**
-     * @see https://developer.wordpress.com/docs/photon/api/#filter
+     * @see https://developer.wordpress.com/docs/photon/api/#strip
      *
      * @param string $src
-     * @param string $filter
+     * @param string $strip
      *
      * @return string
+     *
      */
-    public function apply_image_filter($src, $filter)
+    public function strip($src, $strip)
     {
         if (empty($src)) {
             return '';
@@ -218,12 +367,13 @@ class TimberPhoton
 
         $src = $this->photon_url($src);
 
-        $args['filter'] = $filter;
+        $args['strip'] = $strip;
 
         $src = add_query_arg($args, $src);
 
         return $src;
     }
+
 
     public function plugins_loaded()
     {
