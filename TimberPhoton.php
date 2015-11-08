@@ -30,7 +30,7 @@ class TimberPhoton
         $twig->addFilter('lb', new Twig_Filter_Function([$this, 'add_black_letterboxing']));
         $twig->addFilter('ulb', new Twig_Filter_Function([$this, 'remove_black_letterboxing']));
         $twig->addFilter('quality', new Twig_Filter_Function([$this, 'set_quality']));
-
+        $twig->addFilter('image_filter', new Twig_Filter_Function([$this, 'apply_image_filter']));
 
         return $twig;
     }
@@ -196,6 +196,29 @@ class TimberPhoton
         $src = $this->photon_url($src);
 
         $args['quality'] = $quality;
+
+        $src = add_query_arg($args, $src);
+
+        return $src;
+    }
+
+    /**
+     * @see https://developer.wordpress.com/docs/photon/api/#filter
+     *
+     * @param string $src
+     * @param string $filter
+     *
+     * @return string
+     */
+    public function apply_image_filter($src, $filter)
+    {
+        if (empty($src)) {
+            return '';
+        }
+
+        $src = $this->photon_url($src);
+
+        $args['filter'] = $filter;
 
         $src = add_query_arg($args, $src);
 
