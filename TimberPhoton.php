@@ -4,7 +4,7 @@ Plugin Name: Timber with Jetpack Photon
 Plugin URI: http://slimndap.com
 Description: Make the Timber plugin work with Jetpack's Photon. Once installed, all TimberImages will use Photon as a CDN and for image manipulation (eg. resize).
 Author: Jeroen Schmit
-Version: 0.3
+Version: 0.4
 Author URI: http://slimndap.com
 */
 
@@ -12,14 +12,9 @@ class TimberPhoton
 {
     public function __construct()
     {
-        $this->admin_notices = array();
-        $this->photon_hosts = array(
-            'i0.wp.com',
-            'i1.wp.com',
-            'i2.wp.com',
-        );
+        $this->admin_notices = [];
 
-        add_action('plugins_loaded', array($this, 'plugins_loaded'));
+        add_action('plugins_loaded', [$this, 'plugins_loaded']);
     }
 
     /**
@@ -29,12 +24,12 @@ class TimberPhoton
      */
     public function twig_apply_filters($twig)
     {
-        $twig->addFilter('crop', new Twig_Filter_Function(array($this, 'crop')));
-        $twig->addFilter('resize', new Twig_Filter_Function(array($this, 'resize')));
-        $twig->addFilter('fit', new Twig_Filter_Function(array($this, 'fit')));
-        $twig->addFilter('lb', new Twig_Filter_Function(array($this, 'add_black_letterboxing')));
-        $twig->addFilter('ulb', new Twig_Filter_Function(array($this, 'remove_black_letterboxing')));
-        $twig->addFilter('quality', new Twig_Filter_Function(array($this, 'set_quality')));
+        $twig->addFilter('crop', new Twig_Filter_Function([$this, 'crop']));
+        $twig->addFilter('resize', new Twig_Filter_Function([$this, 'resize']));
+        $twig->addFilter('fit', new Twig_Filter_Function([$this, 'fit']));
+        $twig->addFilter('lb', new Twig_Filter_Function([$this, 'add_black_letterboxing']));
+        $twig->addFilter('ulb', new Twig_Filter_Function([$this, 'remove_black_letterboxing']));
+        $twig->addFilter('quality', new Twig_Filter_Function([$this, 'set_quality']));
 
 
         return $twig;
@@ -210,25 +205,31 @@ class TimberPhoton
     public function plugins_loaded()
     {
         if ($this->system_ready()) {
-            add_action('timber/twig/filters', array(&$this, 'twig_apply_filters'), 99);
-            add_action('twig_apply_filters', array(&$this, 'twig_apply_filters'), 99);
-            add_filter('timber_image_src', array($this, 'timber_image_src'));
+            add_action('timber/twig/filters', [&$this, 'twig_apply_filters'], 99);
+            add_action('twig_apply_filters', [&$this, 'twig_apply_filters'], 99);
+            add_filter('timber_image_src', [$this, 'timber_image_src']);
         }
     }
 
     /**
      * Translate a URL to a Photon URL.
-     * Photon docs: http://i0.wp.com/$REMOTE_IMAGE_URL.
+     * @see https://developer.wordpress.com/docs/photon/
      *
-     * @param $url
+     * @param string $url
      *
      * @return string
      */
     public function photon_url($url)
     {
+        $photon_hosts = [
+            'i0.wp.com',
+            'i1.wp.com',
+            'i2.wp.com',
+        ];
+
         $parsed_url = parse_url($url);
 
-        if (in_array($parsed_url['host'], $this->photon_hosts)) {
+        if (in_array($parsed_url['host'], $photon_hosts)) {
             return $url;
         }
 
@@ -245,7 +246,7 @@ class TimberPhoton
          * we support multiple sub-domains for Photon. If you tend to have many images per
          * page you can split them across i0.wp.com, i1.wp.com, and i2.wp.com.
          */
-        $photon_host = $this->photon_hosts[abs(crc32($stripped_url) % 2)];
+        $photon_host = $photon_hosts[abs(crc32($stripped_url) % 2)];
 
         // Create a Photon URL.
         $url = $parsed_url['scheme'] . ':// '. $photon_host . '/' . $stripped_url;
@@ -253,9 +254,11 @@ class TimberPhoton
         return $url;
     }
 
-    /*
+    /**
      * Check if Timber and Jetpack are installed and activated.
      * Check if Photon is activated
+     *
+     * @return bool
      */
     public function system_ready()
     {
@@ -264,7 +267,7 @@ class TimberPhoton
         // Is Timber installed and activated?
         if (!class_exists('Timber')) {
             $this->admin_notices[] = 'timber';
-            add_action('admin_notices', array($this, 'admin_notices'));
+            add_action('admin_notices', [$this, 'admin_notices']);
 
             return false;
         }
@@ -272,7 +275,7 @@ class TimberPhoton
         // Determine if Jetpack is installed and can generate photon URLs.
         if (!class_exists('Jetpack') || !method_exists('Jetpack', 'get_active_modules') || !in_array('photon', Jetpack::get_active_modules())) {
             $this->admin_notices[] = 'photon';
-            add_action('admin_notices', array($this, 'admin_notices'));
+            add_action('admin_notices', [$this, 'admin_notices']);
 
             return false;
         }
@@ -280,6 +283,11 @@ class TimberPhoton
         return true;
     }
 
+    /**
+     * @param string $src
+     *
+     * @return string
+     */
     public function timber_image_src($src)
     {
         return $this->photon_url($src);
