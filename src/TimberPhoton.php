@@ -1,20 +1,12 @@
 <?php
-/*
-Plugin Name: Timber with Jetpack Photon
-Plugin URI: http://slimndap.com
-Description: Make the Timber plugin work with Jetpack's Photon. Once installed, all TimberImages will use Photon as a CDN and for image manipulation (eg. resize).
-Author: Jeroen Schmit
-Version: 0.4
-Author URI: http://slimndap.com
-*/
 
 class TimberPhoton
 {
-    public function __construct()
+    public function initialize()
     {
-        $this->admin_notices = [];
-
-        add_action('plugins_loaded', [$this, 'plugins_loaded']);
+        add_action('timber/twig/filters', [&$this, 'twig_apply_filters'], 99);
+        add_action('twig_apply_filters', [&$this, 'twig_apply_filters'], 99);
+        add_filter('timber_image_src', [$this, 'timber_image_src']);
     }
 
     /**
@@ -39,20 +31,6 @@ class TimberPhoton
         $twig->addFilter('strip', new Twig_Filter_Function([$this, 'strip']));
 
         return $twig;
-    }
-
-    public function admin_notices()
-    {
-        if (!empty($this->admin_notices)) {
-            echo '<div class="error"><p>';
-            if (in_array('timber', $this->admin_notices)) {
-                _e('Timber with Jetpack Photon requires the Timber plugin to be installed and activated. <a href="http://jarednova.github.io/timber/">Get it here</a>.');
-            }
-            if (in_array('photon', $this->admin_notices)) {
-                _e('Timber with Jetpack Photon requires the Jetpack plugin to be installed with Photon activated.');
-            }
-            echo '</p></div>';
-        }
     }
 
     /**
@@ -375,15 +353,6 @@ class TimberPhoton
     }
 
 
-    public function plugins_loaded()
-    {
-        if ($this->system_ready()) {
-            add_action('timber/twig/filters', [&$this, 'twig_apply_filters'], 99);
-            add_action('twig_apply_filters', [&$this, 'twig_apply_filters'], 99);
-            add_filter('timber_image_src', [$this, 'timber_image_src']);
-        }
-    }
-
     /**
      * Translate a URL to a Photon URL.
      * @see https://developer.wordpress.com/docs/photon/
@@ -428,35 +397,6 @@ class TimberPhoton
     }
 
     /**
-     * Check if Timber and Jetpack are installed and activated.
-     * Check if Photon is activated
-     *
-     * @return bool
-     */
-    public function system_ready()
-    {
-        global $timber;
-
-        // Is Timber installed and activated?
-        if (!class_exists('Timber')) {
-            $this->admin_notices[] = 'timber';
-            add_action('admin_notices', [$this, 'admin_notices']);
-
-            return false;
-        }
-
-        // Determine if Jetpack is installed and can generate photon URLs.
-        if (!class_exists('Jetpack') || !method_exists('Jetpack', 'get_active_modules') || !in_array('photon', Jetpack::get_active_modules())) {
-            $this->admin_notices[] = 'photon';
-            add_action('admin_notices', [$this, 'admin_notices']);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * @param string $src
      *
      * @return string
@@ -466,5 +406,3 @@ class TimberPhoton
         return $this->photon_url($src);
     }
 }
-
-new TimberPhoton();
