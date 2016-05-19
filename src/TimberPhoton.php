@@ -391,7 +391,11 @@ class TimberPhoton
         $photon_host = $photon_hosts[abs(crc32($stripped_url) % 2)];
 
         // Create a Photon URL.
-        $url = $parsed_url['scheme'] . ':// '. $photon_host . '/' . $stripped_url;
+        $url = sprintf(
+            '//%s/%s',
+            $photon_host,
+            $stripped_url
+        );
 
         return $url;
     }
